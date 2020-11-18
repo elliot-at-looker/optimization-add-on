@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+  <!-- this is a test -->
+  <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+  <style>
+    .branding-below {
+      bottom: 56px;
+      top: 0;
+    }
+
+    .branding-text {
+      left: 7px;
+      position: relative;
+      top: 3px;
+    }
+
+    .col-contain {
+      overflow: hidden;
+    }
+
+    .col-one {
+      float: left;
+      width: 50%;
+    }
+
+    .logo {
+      vertical-align: middle;
+    }
+
+    .radio-spacer {
+      height: 20px;
+    }
+
+    .width-100 {
+      width: 100%;
+    }
+
+    .chip {
+      display: inline-block;
+      margin: 4px;
+      padding: 5px;
+      border-radius: 2px;
+    }
+
+    .positive {
+      background-color: rgba(40, 167, 69, 0.2) !important;
+    }
+
+    .negative {
+      background-color: rgba(220, 53, 69, 0.2) !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar branding-below">
+    <form>
+
+      <div id="job-description-start-container" class="block form-group sidebar-container">
+        <label for="job-description"><b>Job description</b></label>
+        <div class="block">
+          <textarea class="width-100" id="job-description" rows="10"></textarea>
+        </div>
+        <div id="button-bar-start" class="block">
+          <button id="analyze-job-description" class="blue">Analyze</button>
+        </div>
+
+      </div>
+
+      <div id="job-description-processing-container" class="sidebar-container">
+        Processing...
+      </div>
+
+      <div id="job-description-results-container" class="block sidebar-container">
+        <div id="results-summary"></div>
+        <div id="results-not-included" class="block">
+        </div>
+        <div id="results-included" class="block">
+        </div>
+
+        <div id="button-bar-results" class="block">
+          <button id="update-results" class="blue">Update results</button>
+          <button id="back-to-start" class="grey">Back</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+    var currentJobDescriptionGlobal = '';
+    var jobDescriptionResponseGlobal = {};
+
+    $(function () {
+      $('#analyze-job-description').click(() => {
+        if (currentJobDescriptionGlobal.length &&
+          currentJobDescriptionGlobal === $("#job-description").val().trim()) {
+          getUpdatedDocumentText();
+        } else if ($("#job-description").val().length) {
+          preProcessNewJobDescription();
+        } else {
+          showError("Job description cannot be empty!", $('#button-bar-start'));
+        }
+      });
+
+      $('#update-results').click(() => {
+        getUpdatedDocumentText();
+      });
+
+      $('#back-to-start').click(() => {
+        sidebarContainerToShow("job-description-start-container")
+      });
+
+      sidebarContainerToShow("job-description-start-container")
+    });
+
+
+    function preProcessNewJobDescription() {
+      //console.log("preProcessNewJobDescription")
+      var textareaVal = $("#job-description").val().trim();
+      currentJobDescriptionGlobal = textareaVal;
+
+      $('#analyze-job-description').prop('disabled', true);
+
+      sidebarContainerToShow("job-description-processing-container")
+
+
+      //regex from 3 upvoted answer here: 
+      //https://stackoverflow.com/questions/49718279/javascript-remove-string-punctuation-and-split-into-words
+      var jobDescriptionWordArr = textareaVal.toLowerCase().match(/\w+(?:'\w+)*/g);
+      var jobDescriptionWordFreqObj = {};
+      for (var i = 0; i < jobDescriptionWordArr.length; i++) {
+
+        if (jobDescriptionWordArr[i].length > 3) {
+          if (jobDescriptionWordFreqObj.hasOwnProperty(jobDescriptionWordArr[i])) {
+            jobDescriptionWordFreqObj[jobDescriptionWordArr[i]].jDFreq += 1
+          } else {
+            jobDescriptionWordFreqObj[jobDescriptionWordArr[i]] = { jDFreq: 1 }
+          }
+        }
+
+      }
+      //console.log({jobDescriptionWordFreqObj})
+      //console.log(JSON.stringify(jobDescriptionWordFreqObj))
+      sendJobDescriptionToServerAndGetDocumentText(jobDescriptionWordFreqObj)
+    }
+
+
+
+    function sendJobDescriptionToServerAndGetDocumentText(jobDescriptionWordFreqObj) {
+      //console.log("sendJobDescriptionToServerAndGetText");
+      //console.log({jobDescriptionWordFreqObj})
+
+      google.script.run
+        .withSuccessHandler(
+          function (returnSuccess, element) {
+            //console.log({returnSuccess})
+            compareWordFreqResponseToDocument(returnSuccess)
+
+            $('#analyze-job-description').prop('disabled', false);
+          })
+        .withFailureHandler(
+          function (errorMsg, element) {
+            //console.log("errorMsg", errorMsg)
+            showError(msg, $('#button-bar'));
+            $('#analyze-job-description').prop('disabled', false);
+          })
+        .withUserObject(this)
+        .analyzeJobDescription(jobDescriptionWordFreqObj);
+
+    }
+
+
+    function compareWordFreqResponseToDocument(serverResponse) {
+      //console.log("compareWordFreqResponseToDocument");
+      //console.log("serverResponse")
+
+      jobDescriptionResponseGlobal = serverResponse;
+      let { text, wordFreqInfo } = serverResponse;
+
+      wordFreqInfo.sort((a, b) => (a.rezFreq > b.rezFreq) ? 1 : -1)
+
+
+      $("#results-not-included").html("");
+      $("#results-included").html("");
+      $("#results-summary").html("");
+      $("#results-not-included").append('<div>Keywords not included:</div>');
+      $("#results-included").append('<div>Keywords included:</div>');
+
+      var includedCounter = 0;
+      var notIncludedCounter = 0;
+      wordFreqInfo.map(item => {
+        if (item.rezFreq < 132174900.5) {
+          if (text.toLowerCase().indexOf(item.word) > -1) {
+            $("#results-included").append('<span class="chip positive">' + item.word + '</span>');
+            includedCounter += 1;
+          } else {
+            $("#results-not-included").append('<span class="chip negative">' + item.word + '</span>');
+            notIncludedCounter += 1;
+          }
+        }
+      })
+
+      var summaryStr = `Your resume includes ${includedCounter} of ${(includedCounter + notIncludedCounter)} (${((includedCounter / (includedCounter + notIncludedCounter)) * 100).toFixed(2)}%) keywords identified. Try including more keywords to improve your score.`
+      //console.log({summaryStr})
+      $("#results-summary").html(summaryStr);
+
+      sidebarContainerToShow("job-description-results-container")
+    }
+
+
+    function getUpdatedDocumentText() {
+      //console.log("getUpdatedDocumentText");
+      sidebarContainerToShow("job-description-processing-container")
+      google.script.run
+        .withSuccessHandler(
+          function (returnSuccess, element) {
+            jobDescriptionResponseGlobal.text = returnSuccess;
+            compareWordFreqResponseToDocument(jobDescriptionResponseGlobal);
+            $('#analyze-job-description').prop('disabled', false);
+          })
+        .withFailureHandler(
+          function (errorMsg, element) {
+            //console.log("errorMsg", errorMsg)
+            showError(msg, $('#button-bar'));
+            $('#analyze-job-description').prop('disabled', false);
+          })
+        .withUserObject(this)
+        .getText();
+
+    }
+
+    function sidebarContainerToShow(idToShow) {
+      //console.log("sidebarContainerToShow")
+      //console.log({idToShow})
+      $('#error').remove();
+      $(".sidebar-container").hide()
+      $("#" + idToShow).show()
+    }
+
+
+    /**
+     * Inserts a div that contains an error message after a given element.
+     *
+     * @param {string} msg The error message to display.
+     * @param {DOMElement} element The element after which to display the error.
+     */
+    function showError(msg, element) {
+      $('#error').remove();
+      var div = $('<div id="error" class="error">' + msg + '</div>');
+      $(element).after(div);
+    }
+  </script>
+</body>
+
+</html>
