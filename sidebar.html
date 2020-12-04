@@ -54,6 +54,11 @@
     .negative {
       background-color: rgba(220, 53, 69, 0.2) !important;
     }
+
+    .results-container {
+      max-height: 200px;
+      overflow: scroll;
+    }
   </style>
 </head>
 
@@ -62,7 +67,7 @@
     <form>
 
       <div id="job-description-start-container" class="block form-group sidebar-container">
-        <label for="job-description"><b>Job description</b></label>
+        <label for="job-description"><b>Job descriptionnnn</b></label>
         <div class="block">
           <textarea class="width-100" id="job-description" rows="10"></textarea>
         </div>
@@ -78,9 +83,9 @@
 
       <div id="job-description-results-container" class="block sidebar-container">
         <div id="results-summary"></div>
-        <div id="results-not-included" class="block">
+        <div id="results-not-included" class="block results-container">
         </div>
-        <div id="results-included" class="block">
+        <div id="results-included" class="block results-container">
         </div>
 
         <div id="button-bar-results" class="block">
@@ -177,8 +182,8 @@
 
 
     function compareWordFreqResponseToDocument(serverResponse) {
-      //console.log("compareWordFreqResponseToDocument");
-      //console.log("serverResponse")
+      console.log("compareWordFreqResponseToDocument");
+      console.log({ serverResponse });
 
       jobDescriptionResponseGlobal = serverResponse;
       let { text, wordFreqInfo } = serverResponse;
@@ -195,7 +200,7 @@
       var includedCounter = 0;
       var notIncludedCounter = 0;
       wordFreqInfo.map(item => {
-        if (item.rezFreq < 132174900.5) {
+        if (item.rezFreq < 102792861) { //record #random
           if (text.toLowerCase().indexOf(item.word) > -1) {
             $("#results-included").append('<span class="chip positive">' + item.word + '</span>');
             includedCounter += 1;
