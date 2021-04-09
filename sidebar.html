@@ -67,7 +67,7 @@
     <form>
 
       <div id="job-description-start-container" class="block form-group sidebar-container">
-        <label for="job-description"><b>Job descriptionnnn</b></label>
+        <label for="job-description"><b>Enter job description</b></label>
         <div class="block">
           <textarea class="width-100" id="job-description" rows="10"></textarea>
         </div>
@@ -172,7 +172,7 @@
         .withFailureHandler(
           function (errorMsg, element) {
             //console.log("errorMsg", errorMsg)
-            showError(msg, $('#button-bar'));
+            showError(errorMsg, $('#button-bar'));
             $('#analyze-job-description').prop('disabled', false);
           })
         .withUserObject(this)
@@ -182,8 +182,6 @@
 
 
     function compareWordFreqResponseToDocument(serverResponse) {
-      console.log("compareWordFreqResponseToDocument");
-      console.log({ serverResponse });
 
       jobDescriptionResponseGlobal = serverResponse;
       let { text, wordFreqInfo } = serverResponse;
