@@ -97,8 +97,13 @@ function analyzeJobDescription(jobDescriptionWordFreqObj) {
     }
   })
 
-
+  //this returns a string so not going to work as we intend it
+  //need to rethink
   var text = getText();
+  Logger.log({ text })
+  var textSplitByNewLine = text.split("\n");
+  Logger.log("elliot + nick test")
+  Logger.log({ textSplitByNewLine })
 
   return {
     text: text,
