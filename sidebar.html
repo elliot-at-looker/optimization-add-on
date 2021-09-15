@@ -56,7 +56,7 @@
     }
 
     .results-container {
-      max-height: 200px;
+      max-height: 215px;
       overflow: scroll;
     }
   </style>
@@ -65,32 +65,48 @@
 <body>
   <div class="sidebar branding-below">
     <form>
-
-      <div id="job-description-start-container" class="block form-group sidebar-container">
-        <label for="job-description"><b>Enter job description</b></label>
+      <div id="job-description-start-container" class="block sidebar-container">
+        <label for="job-description"><b>Paste a job description for suggestions to tailor your resume to the
+            listing:</b></label>
         <div class="block">
           <textarea class="width-100" id="job-description" rows="10"></textarea>
         </div>
         <div id="button-bar-start" class="block">
           <button id="analyze-job-description" class="blue">Analyze</button>
         </div>
-
+        <div class="block">
+          <a id="show-job-listings" class="blue">Search for jobs</a>
+        </div>
       </div>
-
-      <div id="job-description-processing-container" class="sidebar-container">
+      <div id="job-description-processing-container" class="block sidebar-container">
         Processing...
       </div>
-
       <div id="job-description-results-container" class="block sidebar-container">
-        <div id="results-summary"></div>
+        <div id="results-summary" class="block"></div>
         <div id="results-not-included" class="block results-container">
         </div>
         <div id="results-included" class="block results-container">
         </div>
 
         <div id="button-bar-results" class="block">
-          <button id="update-results" class="blue">Update results</button>
-          <button id="back-to-start" class="grey">Back</button>
+          <button id="update-results" class="blue">Refresh results</button>
+          <button id="back-to-start" class="grey back-to-start">Back</button>
+        </div>
+      </div>
+      <div id="job-listings-container" class="block sidebar-container">
+        <label for="job-search"><b>Search for jobs:</b></label>
+        <div class="block">
+          <label for="job-search-keyword">Enter keyword:</label>
+          <input class="width-100" id="job-search-keyword" placeholder="Software Engineer" />
+        </div>
+        <div class="block">
+          <label for="job-search-location">Enter location:</label>
+          <input class="width-100" id="job-search-location" placeholder="New York, NY" />
+        </div>
+
+        <div id="button-bar-listings" class="block">
+          <button id="search-for-jobs" class="blue">Search</button>
+          <button id="back-to-start" class="grey back-to-start">Back</button>
         </div>
       </div>
     </form>
@@ -117,11 +133,27 @@
         getUpdatedDocumentText();
       });
 
-      $('#back-to-start').click(() => {
+      $('.back-to-start').click(() => {
         sidebarContainerToShow("job-description-start-container")
       });
 
+      $('#show-job-listings').click(() => {
+        sidebarContainerToShow("job-listings-container")
+      });
+
       sidebarContainerToShow("job-description-start-container")
+
+
+      $('#search-for-jobs').click(() => {
+        let keywordVal = $("#job-search-keyword").val().trim();
+        let locationVal = $("#job-search-location").val().trim();
+        if (keywordVal && locationVal) {
+          // initiateJobSearch({ keyword: keywordVal, location: locationVal })
+          showError("This functionality isn't built out yet", $('#button-bar-listings'));
+        } else {
+          showError("You must enter keyword and location", $('#button-bar-listings'));
+        }
+      });
     });
 
 
@@ -164,7 +196,7 @@
       google.script.run
         .withSuccessHandler(
           function (returnSuccess, element) {
-            //console.log({returnSuccess})
+            console.log({ returnSuccess })
             compareWordFreqResponseToDocument(returnSuccess)
 
             $('#analyze-job-description').prop('disabled', false);
@@ -192,8 +224,8 @@
       $("#results-not-included").html("");
       $("#results-included").html("");
       $("#results-summary").html("");
-      $("#results-not-included").append('<div>Keywords not included:</div>');
-      $("#results-included").append('<div>Keywords included:</div>');
+      $("#results-not-included").append('<div><b>Consider adding these words:</b></div>');
+      $("#results-included").append('<div><b>Good job including:</b></div>');
 
       var includedCounter = 0; //
       var notIncludedCounter = 0;
@@ -209,7 +241,7 @@
         }
       })
 
-      var summaryStr = `Your resume includes ${includedCounter} of ${(includedCounter + notIncludedCounter)} (${((includedCounter / (includedCounter + notIncludedCounter)) * 100).toFixed(2)}%) keywords identified. Try including more keywords to improve your score.`
+      var summaryStr = `Your resume includes ${includedCounter} of ${(includedCounter + notIncludedCounter)} (${((includedCounter / (includedCounter + notIncludedCounter)) * 100).toFixed(0)}%) keywords identified. Try including more keywords to improve your score.`
       //console.log({summaryStr})
       $("#results-summary").html(summaryStr);
 
@@ -257,6 +289,36 @@
       $('#error').remove();
       var div = $('<div id="error" class="error">' + msg + '</div>');
       $(element).after(div);
+    }
+
+    function initiateJobSearch({ keyword, location }) {
+      console.log("initiateJobSearch")
+      console.log({ keyword })
+      console.log({ location })
+
+      // var url = "http://footballapi.pulselive.com/football/stats/player/2064?comps=1";
+      var stringToUseForQuery = keyword.replace(" ", "+") + location.replace(" ", "+")
+      console.log({ stringToUseForQuery })
+      console.log('window.location.href', window.location.href)
+
+      // google.script.run
+      //   .withSuccessHandler(
+      //     function (returnSuccess, element) {
+      //       console.log("returnSuccess", returnSuccess)
+
+      //       // jobDescriptionResponseGlobal.text = returnSuccess;
+      //       // compareWordFreqResponseToDocument(jobDescriptionResponseGlobal);
+      //       // $('#analyze-job-description').prop('disabled', false);
+      //     })
+      //   .withFailureHandler(
+      //     function (errorMsg, element) {
+      //       console.log("errorMsg", errorMsg)
+      //       showError(msg, $('#button-bar'));
+      //       // $('#analyze-job-description').prop('disabled', false);
+      //     })
+      //   .withUserObject(this)
+      //   .fetchJobs({ query: stringToUseForQuery, windowLocation: window.location.href });
+
     }
   </script>
 </body>

@@ -45,7 +45,7 @@ function onInstall(e) {
  */
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('sidebar')
-    .setTitle('Analyze Job Description');
+    .setTitle('Optimize your resume');
   DocumentApp.getUi().showSidebar(ui);
 }
 
@@ -69,8 +69,8 @@ function analyzeJobDescription(jobDescriptionWordFreqObj) {
   })
   var jobDescriptionWordFreqStr = jobDescriptionWordFreqArr.join(",");
 
-  var projectId = 'add-on-2021';
-  var selectStmt = `SELECT * FROM word_freq2.frequency WHERE word in (${jobDescriptionWordFreqStr});`
+  var projectId = 'resume-optimization-add-on';
+  var selectStmt = `SELECT * FROM word_freq.frequency WHERE word in (${jobDescriptionWordFreqStr});`
 
   var request = {
     query: selectStmt
@@ -97,13 +97,12 @@ function analyzeJobDescription(jobDescriptionWordFreqObj) {
     }
   })
 
-  //this returns a string so not going to work as we intend it
-  //need to rethink
+  // Logger.log({ jobDescriptionWordFreqObjWithServerInfoArr })
+
+  // //this returns a string so not going to work as we intend it
+  // //need to rethink
   var text = getText();
-  Logger.log({ text })
-  var textSplitByNewLine = text.split("\n");
-  Logger.log("elliot + nick test")
-  Logger.log({ textSplitByNewLine })
+  // Logger.log({ text })
 
   return {
     text: text,
@@ -127,3 +126,47 @@ function getText() {
   return text || "No text";
 }
 
+
+function resumeParserTest() {
+  // Logger.log("resumeParserTest")
+
+  // The code below logs the HTML code of the Google home page.
+  var response = UrlFetchApp.fetch("https://resumaester.corp.google.com/resumaester");
+  Logger.log({ response });
+
+
+
+  // Make a POST request with a JSON payload.
+  var data = {
+    text: getText()
+  };
+  // Logger.log({ data })
+  var options = {
+    'method': 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload': JSON.stringify(data)
+  };
+  var response = UrlFetchApp.fetch('https://resumaester.corp.google.com/resumaester', options);
+  Logger.log({ response })
+
+}
+
+function fetchJobs(searchObj) {
+  // Logger.log("fetchJobs")
+  // Logger.log({ searchObj })
+  let query = '';
+  if (searchObj === undefined) query = "software+engineer+nyc"
+  else query = searchObj.query;
+  // Logger.log({ query })
+
+  var urlToFetch = "https://www.google.com/search?q=" + query;
+
+  var options = {
+    "headers": {
+      "Origin": "https://www.docs.google.com"
+    }
+  }
+  var json = JSON.parse(UrlFetchApp.fetch(urlToFetch, options).getContentText());
+  // Logger.log({ json })
+}
