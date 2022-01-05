@@ -154,6 +154,12 @@
           showError("You must enter keyword and location", $('#button-bar-listings'));
         }
       });
+
+      // $('body').on('click', function(e){
+      //     if (e.target.id){
+      //       passTargetIdToServer(e.target.id)
+      //     }
+      // });
     });
 
 
@@ -319,6 +325,23 @@
       //   .withUserObject(this)
       //   .fetchJobs({ query: stringToUseForQuery, windowLocation: window.location.href });
 
+    }
+
+    function passTargetIdToServer(id){
+      // console.log("passTargetIdToServer")
+      // console.log({id})
+      google.script.run
+        .withSuccessHandler(
+          function (returnSuccess, element) {
+            console.log({ returnSuccess })
+          })
+        .withFailureHandler(
+          function (errorMsg, element) {
+            //console.log("errorMsg", errorMsg)
+            showError(errorMsg, $('#button-bar'));
+          })
+        .withUserObject(this)
+        .recordClickStream(id);
     }
   </script>
 </body>
