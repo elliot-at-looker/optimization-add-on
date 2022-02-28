@@ -48,7 +48,8 @@ function onInstall(e) {
  */
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('sidebar')
-    .setTitle('Optimize Document');
+    // .setTitle('Optimize Document');
+    .setTitle('Optimize Resume');
   DocumentApp.getUi().showSidebar(ui);
 }
 
