@@ -48,7 +48,7 @@ function onInstall(e) {
  */
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('sidebar')
-    .setTitle('Optimize your resume');
+    .setTitle('Optimize Document');
   DocumentApp.getUi().showSidebar(ui);
 }
 
@@ -70,7 +70,6 @@ function analyzeJobDescription_BQ(jobDescriptionWordFreqObj) {
   })
   var jobDescriptionWordFreqStr = jobDescriptionWordFreqArr.join(",");
 
-  // var projectId = 'resume-optimization-add-on';
   var projectId = 'airy-task-342220';
   var selectStmt = `SELECT * FROM word_freq.frequency WHERE word in (${jobDescriptionWordFreqStr});`
 
