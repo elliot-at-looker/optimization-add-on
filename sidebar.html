@@ -119,6 +119,7 @@
 
     $(function () {
       $('#analyze-job-description').click(() => {
+        console.log("analyze-job-description click")
         if (currentJobDescriptionGlobal.length &&
           currentJobDescriptionGlobal === $("#job-description").val().trim()) {
           getUpdatedDocumentText();
@@ -155,11 +156,11 @@
         }
       });
 
-      // $('body').on('click', function(e){
-      //     if (e.target.id){
-      //       passTargetIdToServer(e.target.id)
-      //     }
-      // });
+      $('body').on('click', function(e){
+          if (e.target.id){
+            passTargetIdToServer(e.target.id)
+          }
+      });
     });
 
 
@@ -196,8 +197,8 @@
 
 
     function sendJobDescriptionToServerAndGetDocumentText(jobDescriptionWordFreqObj) {
-      //console.log("sendJobDescriptionToServerAndGetText");
-      //console.log({jobDescriptionWordFreqObj})
+      console.log("sendJobDescriptionToServerAndGetText");
+      console.log({jobDescriptionWordFreqObj})
 
       google.script.run
         .withSuccessHandler(
@@ -209,7 +210,7 @@
           })
         .withFailureHandler(
           function (errorMsg, element) {
-            //console.log("errorMsg", errorMsg)
+            console.log("errorMsg", errorMsg)
             showError(errorMsg, $('#button-bar'));
             $('#analyze-job-description').prop('disabled', false);
           })
@@ -256,18 +257,19 @@
 
 
     function getUpdatedDocumentText() {
-      //console.log("getUpdatedDocumentText");
+      console.log("getUpdatedDocumentText");
       sidebarContainerToShow("job-description-processing-container")
       google.script.run
         .withSuccessHandler(
           function (returnSuccess, element) {
+            console.log({ returnSuccess })
             jobDescriptionResponseGlobal.text = returnSuccess;
             compareWordFreqResponseToDocument(jobDescriptionResponseGlobal);
             $('#analyze-job-description').prop('disabled', false);
           })
         .withFailureHandler(
           function (errorMsg, element) {
-            //console.log("errorMsg", errorMsg)
+            console.log("errorMsg", errorMsg)
             showError(msg, $('#button-bar'));
             $('#analyze-job-description').prop('disabled', false);
           })
@@ -328,8 +330,8 @@
     }
 
     function passTargetIdToServer(id){
-      // console.log("passTargetIdToServer")
-      // console.log({id})
+      console.log("passTargetIdToServer")
+      console.log({id})
       google.script.run
         .withSuccessHandler(
           function (returnSuccess, element) {
@@ -337,7 +339,7 @@
           })
         .withFailureHandler(
           function (errorMsg, element) {
-            //console.log("errorMsg", errorMsg)
+            console.log("errorMsg", errorMsg)
             showError(errorMsg, $('#button-bar'));
           })
         .withUserObject(this)
