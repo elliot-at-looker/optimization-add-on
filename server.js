@@ -1,11 +1,3 @@
-/**
- * 
- * @param {var connectionName = 'Instance_connection_name';
-var rootPwd = 'guhNqmmAwH1JL83j';
-var user = 'user_name';
-var userPwd = 'user_password';
-var db = 'database_name';} e 
- */
 
 /**
  * @OnlyCurrentDoc
@@ -179,14 +171,15 @@ function analyzeJobDescription(jobDescriptionWordFreqObj) {
 }
 
 /**
-  * Record user's latest action to db
+  * Send click event to cloud function
+  * to record in db
  */
 function recordClickStream(id) {
-  Logger.log("recordClickStream")
+  // Logger.log("recordClickStream")
   if (!id){
     id = "~~~test~~~"
   }
-  Logger.log({id})
+  // Logger.log({id})
   const userKey = Session.getTemporaryActiveUserKey();
   const email = Session.getActiveUser().getEmail();
   const timeZone = Session.getScriptTimeZone();
@@ -206,6 +199,6 @@ function recordClickStream(id) {
   };
   
   var response = UrlFetchApp.fetch('https://us-central1-airy-task-342220.cloudfunctions.net/add_click_stream_event', options);
-  Logger.log({response})
+  // Logger.log({response})
   return response.message;
 }
