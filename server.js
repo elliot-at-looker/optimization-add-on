@@ -49,7 +49,7 @@ function onInstall(e) {
 function showSidebar() {
   var ui = HtmlService.createHtmlOutputFromFile('sidebar')
     // .setTitle('Optimize Document');
-    .setTitle('Optimize Resume');
+    .setTitle('Optimize');
   DocumentApp.getUi().showSidebar(ui);
 }
 
@@ -201,4 +201,42 @@ function recordClickStream(id) {
   var response = UrlFetchApp.fetch('https://us-central1-airy-task-342220.cloudfunctions.net/add_click_stream_event', options);
   // Logger.log({response})
   return response.message;
+}
+
+function getSentiment() {
+  Logger.log("getSentiment")
+  var apiKey = PropertiesService.getScriptProperties().getProperty('CLOUD_NATURAL_LANGUANGE_API_KEY');
+
+  var text = getText();
+
+  var requestUrl = ['https://language.googleapis.com/v1/documents:analyzeEntities?key=', apiKey].join(
+    ''
+  );
+
+  // Use documents:analyzeEntities API endpoint for analyzing entities
+  // Use documents:analyzeSyntax API endpoint for synctactic (linguistic) analysis
+
+  var data = {
+    document: {
+      language: 'en-us',
+      type: 'PLAIN_TEXT',
+      content: text,
+    },
+    encodingType: 'UTF8',
+  };
+
+  var options = {
+    method: 'POST',
+    contentType: 'application/json',
+    payload: JSON.stringify(data),
+  };
+
+  var response = UrlFetchApp.fetch(requestUrl, options);
+
+  var data = JSON.parse(response);
+  var dataBySalience = data.entities.sort( (a, b) => {return b.salience - a.salience} );
+  // Logger.log({dataBySalience})
+  return {data: dataBySalience}
+
+
 }

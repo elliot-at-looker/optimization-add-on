@@ -45,6 +45,7 @@
       margin: 4px;
       padding: 5px;
       border-radius: 2px;
+      cursor: pointer;
     }
 
     .positive {
@@ -53,6 +54,10 @@
 
     .negative {
       background-color: rgba(220, 53, 69, 0.2) !important;
+    }
+
+    .neutral {
+      background-color: rgba(245, 245, 245, 1) !important;
     }
 
     .results-container {
@@ -66,6 +71,9 @@
   <div class="sidebar branding-below">
     <form>
       <div id="job-description-start-container" class="block sidebar-container">
+        <div id="sentiment-suggestions">
+        <label><b>Interested in any of these?</b></label>  
+        </div>
         <label for="job-description"><b>Paste a job description for suggestions to tailor your resume to the
           listing:</b></label>        
           <div class="block">
@@ -161,6 +169,8 @@
             passTargetIdToServer(e.target.id)
           }
       });
+      //pretty sure this will run onload
+      getSentiment()
     });
 
 
@@ -197,8 +207,8 @@
 
 
     function sendJobDescriptionToServerAndGetDocumentText(jobDescriptionWordFreqObj) {
-      console.log("sendJobDescriptionToServerAndGetText");
-      console.log({jobDescriptionWordFreqObj})
+      // console.log("sendJobDescriptionToServerAndGetText");
+      // console.log({jobDescriptionWordFreqObj})
 
       google.script.run
         .withSuccessHandler(
@@ -256,8 +266,8 @@
 
 
     function getUpdatedDocumentText() {
-      console.log("getUpdatedDocumentText");
-      sidebarContainerToShow("job-description-processing-container")
+      // console.log("getUpdatedDocumentText");
+      // sidebarContainerToShow("job-description-processing-container")
       google.script.run
         .withSuccessHandler(
           function (returnSuccess, element) {
@@ -299,9 +309,9 @@
     }
 
     function initiateJobSearch({ keyword, location }) {
-      console.log("initiateJobSearch")
-      console.log({ keyword })
-      console.log({ location })
+      // console.log("initiateJobSearch")
+      // console.log({ keyword })
+      // console.log({ location })
 
       // var url = "http://footballapi.pulselive.com/football/stats/player/2064?comps=1";
       var stringToUseForQuery = keyword.replace(" ", "+") + location.replace(" ", "+")
@@ -329,8 +339,8 @@
     }
 
     function passTargetIdToServer(id){
-      console.log("passTargetIdToServer")
-      console.log({id})
+      // console.log("passTargetIdToServer")
+      // console.log({id})
       google.script.run
         .withSuccessHandler(
           function (returnSuccess, element) {
@@ -343,6 +353,27 @@
           })
         .withUserObject(this)
         .recordClickStream(id);
+    }
+
+    function getSentiment(){
+      console.log("getSentiment")
+      google.script.run
+        .withSuccessHandler(
+          function (returnSuccess, element) {
+            // console.log({ returnSuccess })
+            $("#sentiment-suggestions").html("<label><b>Interested in any of these?</b></label> ")
+            const {data} = returnSuccess;
+            for (let i = 0 ; i < 5 ; i++){
+              $("#sentiment-suggestions").append('<span class="chip neutral">' + data[i].name + '</span>');
+            }
+          })
+        .withFailureHandler(
+          function (errorMsg, element) {
+            console.log("errorMsg", errorMsg)
+            showError(errorMsg, $('#button-bar'));
+          })
+        .withUserObject(this)
+        .getSentiment();
     }
   </script>
 </body>
